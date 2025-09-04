@@ -1,13 +1,22 @@
-import { Tabs } from "expo-router";
-import { Platform } from "react-native";
-
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { useOnlineManager } from "@/hooks/useOnlineManager";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import * as Clipboard from "expo-clipboard";
+import Constants from "expo-constants";
+import { Tabs } from "expo-router";
+import { Platform } from "react-native";
+import { DevToolsBubble } from "react-native-react-query-devtools";
+const queryClient = new QueryClient();
+const hostIP =
+  Constants.expoGoConfig?.debuggerHost?.split(":")[0] ||
+  Constants.expoConfig?.hostUri?.split(":")[0];
+console.warn("hostIP", hostIP);
 
-export default function TabLayout() {
+function TabChildren() {
   const colorScheme = useColorScheme();
 
   return (
@@ -54,5 +63,23 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+  );
+}
+
+export default function TabLayout() {
+  useOnlineManager();
+  const onCopy = async (text: string) => {
+    try {
+      await Clipboard.setStringAsync(text);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TabChildren />
+      <DevToolsBubble onCopy={onCopy} queryClient={queryClient} />
+    </QueryClientProvider>
   );
 }
