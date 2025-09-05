@@ -1,14 +1,16 @@
 import { HapticTab } from "@/components/HapticTab";
+import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import useInitApp from "@/hooks/useInitApp";
 import { useOnlineManager } from "@/hooks/useOnlineManager";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
 import { Tabs } from "expo-router";
-import { Platform } from "react-native";
+import { ActivityIndicator, Platform } from "react-native";
 import { DevToolsBubble } from "react-native-react-query-devtools";
 const queryClient = new QueryClient();
 const hostIP =
@@ -18,7 +20,21 @@ console.warn("hostIP", hostIP);
 
 function TabChildren() {
   const colorScheme = useColorScheme();
-
+  const { isLoading, isFetching } = useInitApp();
+  console.warn("isLoading", isLoading);
+  console.warn("isFetching", isFetching);
+  if (isLoading) {
+    return (
+      <ThemedView
+        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      >
+        <ActivityIndicator
+          size="large"
+          color={Colors[colorScheme ?? "light"].tint}
+        />
+      </ThemedView>
+    );
+  }
   return (
     <Tabs
       screenOptions={{
